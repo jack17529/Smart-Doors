@@ -160,8 +160,7 @@ def main():
     
     #==================================================================================================
 
-    #ACCESS_KEY_ID = 'AKIAJRBXB5I4DBCIZNFA'
-    #ACCESS_SECRET_KEY = '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'
+    
     BUCKET_NAME = 'trgim' #target image
 
     ImageName = 'Unknown.jpg'
@@ -243,11 +242,11 @@ def main():
 
     mail.starttls()                             #TLS support so that login is encrypted.
 
-    mail.login('jackcoreman1729@gmail.com','Rama@171969')
+    mail.login(your_email_id, password)
 
     email_msg = "Subject: {} \n\n{}".format(subject,content)
 
-    mail.sendmail('jackcoreman1729@gmail.com',email,email_msg)
+    mail.sendmail(your_email_id,email,email_msg)
     mail.close()
     
     #===============================================================================================
