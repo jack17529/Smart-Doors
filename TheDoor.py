@@ -171,7 +171,7 @@ def main():
 
     ImageName = 'Unknown.jpg'
 
-    data = open(ImageName , 'rb')
+    data = open(ImageName , 'rb')                               #opening image as data.
     '''
     #Removed because unsafe. 
     s3 = boto3.resource(
@@ -181,25 +181,25 @@ def main():
         config=Config(signature_version='s3v4')
     )
     '''
-    s3 = boto3.resource('s3')
-    s3.Bucket(BUCKET_NAME).put_object(Key=ImageName, Body=data)
+    s3 = boto3.resource('s3')                                       #using object of s3.
+    s3.Bucket(BUCKET_NAME).put_object(Key=ImageName, Body=data)     # putting in bucket.
 
     #print ("Done")
 
     #================================================================================================
 
     #s3 = boto3.resource('s3')
-    BUCKET_NAME2 = 'srcim'
+    BUCKET_NAME2 = 'srcim'                                          # bucket that contain all the images of the known people.
     my_bucket = s3.Bucket(BUCKET_NAME2)
 
     #con2 = 0
     Name = ''
 
-    client=boto3.client('rekognition','us-east-1')
-
+    client=boto3.client('rekognition','us-east-1')   #Create a low-level service client by name using the default session.
+                                                     # service name and region.
     for s3_file in my_bucket.objects.all():
         #print(s3_file.key)
-        #con2 = max(con2,Rekon(s3_file.key))
+        #con2 = max(con2,Rekon(s3_file.key))        # if similarity is more then 70% then it will be matched.
         if (len(client.compare_faces(SimilarityThreshold=70,
                                   SourceImage={'S3Object':{'Bucket':BUCKET_NAME2,'Name':s3_file.key}},
                                   TargetImage={'S3Object':{'Bucket':BUCKET_NAME,'Name':ImageName}}))!=0):
@@ -209,23 +209,23 @@ def main():
             for faceMatch in response['FaceMatches']:
                 position = faceMatch['Face']['BoundingBox']
                 confidence = str(faceMatch['Face']['Confidence'])
-                if(confidence>80):
+                if(confidence>80):                  # all images in array that have confidence above 80%.
                     Name = s3_file.key
                     break
             
 
-    Name = Name[:-4]
+    Name = Name[:-4]                                # removing extension
     print (Name)
     
     #================================================================================================
 
     email=''
 
-    with open('data.csv','r') as f:
+    with open('data.csv','r') as f:                 # accessing database to find email.
         r=csv.reader(f,delimiter=',')
         for row in r:
             #print(row[0])
-            if len(row)==2 and row[0]==Name:
+            if len(row)==2 and row[0]==Name:        # it has both fiels name and email.
                 email = row[1]
                 #print(email)
 
@@ -243,10 +243,11 @@ def main():
 
     content = summary+'. Will get time after '+ end
 
-    mail = smtplib.SMTP('smtp.gmail.com',587)   #can change the port in the future
+    mail = smtplib.SMTP('smtp.gmail.com',587)   #can change the port in the future, the gamil server.
     mail.ehlo()                                 #for esmtp server.
 
     mail.starttls()                             #TLS support so that login is encrypted.
+                                                #STARTTLS command to convert the connection to a secure TLS channel.
 
     mail.login(your_email_id, password)
 
