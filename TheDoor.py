@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function   #  to bring the print function from Python 3 into Python 2.6+
 import httplib2                         #pip2.7.exe install httplib2 --upgrade
 import os
 
@@ -8,31 +8,35 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 
-import datetime
+import datetime                         #for date time functionality.
 #=================================================================================================
 
-import urllib2
+import urllib2                          # to fetch a particular url.
 import cv2
 import numpy as np
-import ssl
+import ssl                              #secure socket Layer
 
 #=================================================================================================
 
-import boto3
+import boto3                            # for amazon face recognition api (AWS SDK for python)
 from botocore.client import Config
 
 #=================================================================================================
 
-import csv
+import csv                              # for database.
 
 #=================================================================================================
 
-import smtplib
+import smtplib                          # for sending emails.
 
 #=================================================================================================
+
+#$ python prog.py -h
+#usage: prog.py [-h] [--sum] N [N ...]
+# used for the argument parsing in command line.
 
 try:
-    import argparse
+    import argparse     # to parse the argument and take out flags.
     flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
 except ImportError:
     flags = None
@@ -50,12 +54,14 @@ def get_credentials():
     Returns:
         Credentials, the obtained credential.
     """
-    home_dir = os.path.expanduser('~')
+    home_dir = os.path.expanduser('~')      #Windows, return the argument with an initial component of ~ 
+                                            #or ~user replaced by that user’s home directory
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
     credential_path = os.path.join(credential_dir,
-                                   'calendar-python-quickstart.json')
+                                   'calendar-python-quickstart.json') #If a component is an absolute path, 
+                            #all previous components are thrown away and joining continues from the absolute path component.
 
     store = Storage(credential_path)
     credentials = store.get()
@@ -77,13 +83,10 @@ def Rekon(src,s):
     bucket = 'srcim'
     sourceFile=src    #source.jpg
     targetFile='Unknown.jpg'             #target.jpg
-
     client=boto3.client('rekognition','us-east-1')
-
     response=client.compare_faces(SimilarityThreshold=70,
                                   SourceImage={'S3Object':{'Bucket':bucket,'Name':sourceFile}},
                                   TargetImage={'S3Object':{'Bucket':bucket,'Name':targetFile}})
-
     if len(response['FaceMatches'])==0:
         return 0
     else:
@@ -110,14 +113,15 @@ def main():
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time // ,timeMax=now
+    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time // ,timeMax=now 
+                                                       # datetime.utcnow() uses OS provided values.
     print('Getting the current event')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=1, singleEvents=True,
         orderBy='startTime').execute()
-    events = eventsResult.get('items', [])
+    events = eventsResult.get('items', [])              #getting events in an array.
 
-    start = ''
+    start = ''                                          # I will use these in the end while sending mail.
     end = ''
     #summary = ''
 
@@ -137,19 +141,21 @@ def main():
     #=================================================================================================
     
     #using IP Webcam.
+                                                   #https://docs.python.org/3/library/ssl.html#client-side-operation
+    ctx = ssl.create_default_context()             # using at client side.
+    ctx.check_hostname = False                     # removing check of hostname.
+    ctx.verify_mode = ssl.CERT_NONE                # In this mode (the default), 
+                                              #no certificates will be required from the other side of the socket connection. 
+                                        # If a certificate is received from the other end, no attempt to validate it is made.
 
-    ctx = ssl.create_default_context()             
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-
-    url = 'https://192.168.201.2:8080/shot.jpg'
+    url = 'https://192.168.202.3:8080/shot.jpg'
 
     while True:
-        imgResp = urllib2.urlopen(url,context=ctx)
-        imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8)
+        imgResp = urllib2.urlopen(url,context=ctx)                 # this is where the connection is made.
+        imgNp = np.array(bytearray(imgResp.read()),dtype=np.uint8) # reading image as a numpy array.
         img = cv2.imdecode(imgNp,-1)
-        cv2.imshow('test',img)
-        cv2.waitKey(3000)
+        cv2.imshow('test',img)                                     # showing the image.
+        cv2.waitKey(3000)                                          # waiting for for 3 seconds.
         cv2.imwrite('Unknown.jpg',img)
         break
         #if cv2.waitKey(1000/12) & 0xff ==ord('q'):
