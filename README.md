@@ -1,6 +1,6 @@
 # Smart-Doors
 
-Run it using -> py -2 becuase it's a Python2 project. If you have both version of Python installed.
+Run it using -> py -2 becuase it's a Python2 project, if you have both version of Python installed.
 
 ## License & copyright
 
